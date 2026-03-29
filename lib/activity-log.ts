@@ -39,7 +39,7 @@ export async function logActivity(payload: LogPayload): Promise<void> {
         subjectType: payload.subject?.type ?? null,
         subjectId: payload.subject?.id ?? null,
         subjectName: payload.subject?.name ?? null,
-        metadata: payload.metadata ?? undefined,
+        metadata: (payload.metadata ?? undefined) as never,
       },
     });
   } catch {
