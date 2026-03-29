@@ -44,7 +44,7 @@ export default function LoginPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icon-tg-cow.svg" alt="T/G" width={44} height={44} />
           <Title order={1} size="h2" fw={900} lts="-0.02em" mt="xs">
-            TG Portal
+            T<span style={{ color: BRAND.orange }}>/</span>G Portal
           </Title>
           <Text size="sm" c="gray.5">
             Sign in to continue
