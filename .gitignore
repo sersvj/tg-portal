@@ -24,6 +24,16 @@
 .DS_Store
 *.pem
 
+# local scripts (not for repo)
+scripts/reset-db.ts
+
+# AI/agent working files
+CLAUDE.md
+AGENTS.md
+DESIGN.md
+PLAN.md
+PROGRESS.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*

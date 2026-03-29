@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing Blueprint Questionnaire</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f3;
+    color: #1a1a1a;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .form-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 2.5rem 2.5rem 3rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .form-header { margin-bottom: 2rem; }
+  .form-header h1 { font-size: 24px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.35rem; }
+  .form-header p { font-size: 14px; color: #666; line-height: 1.6; }
+
+  .progress-bar-track {
+    height: 4px;
+    background: #e8e8e5;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+  .progress-bar-fill {
+    height: 4px;
+    background: #378ADD;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+  .section-title { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.35rem; }
+  .section-desc { font-size: 14px; color: #666; margin-bottom: 1.75rem; line-height: 1.6; }
+
+  .step { display: none; }
+  .step.active { display: block; animation: fadein 0.3s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .q { margin-bottom: 1.5rem; }
+  .q-label { font-size: 14px; font-weight: 500; color: #1a1a1a; margin-bottom: 0.5rem; display: block; }
+  .q-hint { font-size: 12px; color: #999; margin-top: -0.2rem; margin-bottom: 0.5rem; display: block; }
+
+  input[type=text], input[type=url], input[type=number], input[type=email], textarea, select {
+    width: 100%;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid #e0e0dc;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fff;
+    color: #1a1a1a;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input[type=text]:focus, input[type=url]:focus, input[type=number]:focus,
+  input[type=email]:focus, textarea:focus, select:focus {
+    border-color: #378ADD;
+    box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
+  }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choice {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid #e0e0dc;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #fff;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .choice:hover { border-color: #378ADD; background: #f5f9fe; }
+  .choice.selected { border-color: #378ADD; background: #EBF4FC; }
+  .choice input { display: none; }
+
+  .choice-mark {
+    width: 17px; height: 17px; border-radius: 50%;
+    border: 1.5px solid #ccc;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
+  }
+  .choice.selected .choice-mark { background: #378ADD; border-color: #378ADD; }
+  .choice.selected .choice-mark::after {
+    content: ''; width: 6px; height: 6px; border-radius: 50%; background: white;
+  }
+
+  .choice-check {
+    width: 17px; height: 17px; border-radius: 4px;
+    border: 1.5px solid #ccc;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
+  }
+  .choice.selected .choice-check { background: #378ADD; border-color: #378ADD; }
+  .choice.selected .choice-check::after { content: '✓'; color: white; font-size: 10px; font-weight: 700; }
+  .choice-text { font-size: 14px; color: #1a1a1a; }
+
+  .likert { overflow-x: auto; margin-top: 0.5rem; }
+  .likert-table { width: 100%; border-collapse: collapse; min-width: 420px; }
+  .likert-table th {
+    font-size: 11px; color: #888; font-weight: 500;
+    text-align: center; padding: 4px 6px 10px;
+  }
+  .likert-table th:first-child { text-align: left; }
+  .likert-table td {
+    padding: 8px 6px; text-align: center;
+    border-top: 1px solid #f0f0ec;
+  }
+  .likert-table td.stmt {
+    text-align: left; font-size: 13px; color: #333;
+    padding-right: 16px; min-width: 180px; line-height: 1.4;
+  }
+  .likert-radio {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid #ccc;
+    margin: 0 auto; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .likert-radio:hover { border-color: #378ADD; background: #f0f7ff; }
+  .likert-radio.sel { background: #378ADD; border-color: #378ADD; }
+  .likert-radio.sel::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: white; display: block; }
+
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 2rem; padding-top: 1.5rem;
+    border-top: 1px solid #f0f0ec;
+  }
+  .btn {
+    padding: 10px 22px; font-size: 14px; font-family: inherit;
+    border-radius: 8px; cursor: pointer; font-weight: 500;
+    transition: all 0.15s; border: 1px solid #ddd;
+    background: #fff; color: #1a1a1a;
+  }
+  .btn:hover { background: #f5f5f3; border-color: #bbb; }
+  .btn-primary { background: #378ADD; border-color: #378ADD; color: white; }
+  .btn-primary:hover { background: #2b6fb5; border-color: #2b6fb5; }
+  .btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+  .step-count { font-size: 13px; color: #999; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 500px) { .grid2 { grid-template-columns: 1fr; } .form-wrap { padding: 1.5rem 1.25rem 2rem; } }
+
+  .complete { text-align: center; padding: 3rem 1rem; display: none; }
+  .complete.active { display: block; animation: fadein 0.4s ease; }
+  .complete-icon {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #EAF5F0; margin: 0 auto 1.25rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .complete h2 { font-size: 22px; font-weight: 600; margin-bottom: 0.5rem; color: #1a1a1a; }
+  .complete p { font-size: 14px; color: #666; line-height: 1.7; max-width: 420px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<div class="form-wrap">
+
+  <div class="form-header">
+    <h1>Marketing Blueprint</h1>
+    <p>Help us understand your business, goals, and market so we can build the right strategy for you.</p>
+  </div>
+
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progress" style="width: 8.33%"></div>
+  </div>
+
+  <!-- SECTION 1: Business Overview -->
+  <div class="step active" id="s1">
+    <div class="section-label">Section 1 of 12</div>
+    <div class="section-title">Business overview</div>
+    <div class="section-desc">Let's start with the basics about your business.</div>
+
+    <div class="q"><label class="q-label">Company name</label><input type="text" name="company_name" placeholder="Acme Corp"></div>
+    <div class="q"><label class="q-label">Website URL</label><input type="url" name="website" placeholder="https://"></div>
+    <div class="q"><label class="q-label">Primary contact name &amp; role</label><input type="text" name="contact" placeholder="Jane Smith, VP of Marketing"></div>
+    <div class="q"><label class="q-label">Contact email</label><input type="email" name="email" placeholder="jane@company.com"></div>
+    <div class="q"><label class="q-label">How would you describe your business to someone unfamiliar with it?</label><textarea name="biz_desc" placeholder="In one or two sentences…"></textarea></div>
+    <div class="q"><label class="q-label">What products or services does your company offer?</label><textarea name="offerings" placeholder="Describe your core offerings…"></textarea></div>
+    <div class="q"><label class="q-label">What makes your company different from competitors?</label><textarea name="differentiator" placeholder="Your unique value or approach…"></textarea></div>
+    <div class="q"><label class="q-label">What do customers value most about working with you?</label><textarea name="customer_value" placeholder="Quality, speed, trust, expertise…"></textarea></div>
+  </div>
+
+  <!-- SECTION 2: Goals & Growth -->
+  <div class="step" id="s2">
+    <div class="section-label">Section 2 of 12</div>
+    <div class="section-title">Business goals &amp; growth targets</div>
+    <div class="section-desc">Help us understand where you want to go in the next 12–24 months.</div>
+
+    <div class="q"><label class="q-label">Top business goals for the next 12–24 months (select all that apply)</label>
+      <div class="choices" id="goals-check">
+        <label class="choice"><input type="checkbox" name="goals" value="revenue_growth"><div class="choice-check"></div><span class="choice-text">Revenue growth</span></label>
+        <label class="choice"><input type="checkbox" name="goals" value="new_markets"><div class="choice-check"></div><span class="choice-text">Expansion into new markets</span></label>
+        <label class="choice"><input type="checkbox" name="goals" value="new_services"><div class="choice-check"></div><span class="choice-text">Launching new services or products</span></label>
+        <label class="choice"><input type="checkbox" name="goals" value="brand_visibility"><div class="choice-check"></div><span class="choice-text">Increasing brand visibility</span></label>
+        <label class="choice"><input type="checkbox" name="goals" value="retention"><div class="choice-check"></div><span class="choice-text">Improving customer retention</span></label>
+        <label class="choice"><input type="checkbox" name="goals" value="lower_cac"><div class="choice-check"></div><span class="choice-text">Reducing customer acquisition cost</span></label>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="q"><label class="q-label">Approximate revenue last year</label><input type="text" name="rev_last_year" placeholder="e.g. $500K"></div>
+      <div class="q"><label class="q-label">Revenue goal for next 12 months</label><input type="text" name="rev_goal" placeholder="e.g. $1M"></div>
+    </div>
+    <div class="q"><label class="q-label">Average value of a typical sale or project</label><input type="text" name="avg_deal" placeholder="e.g. $5,000"></div>
+    <div class="q"><label class="q-label">New customers or accounts needed per month</label><input type="number" name="new_customers_needed" placeholder="e.g. 10"></div>
+
+    <div class="q"><label class="q-label">Percentage of revenue from repeat customers</label>
+      <div class="choices" id="repeat-rev">
+        <label class="choice"><input type="radio" name="repeat_rev" value="0-25"><div class="choice-mark"></div><span class="choice-text">0 – 25%</span></label>
+        <label class="choice"><input type="radio" name="repeat_rev" value="25-50"><div class="choice-mark"></div><span class="choice-text">25 – 50%</span></label>
+        <label class="choice"><input type="radio" name="repeat_rev" value="50-75"><div class="choice-mark"></div><span class="choice-text">50 – 75%</span></label>
+        <label class="choice"><input type="radio" name="repeat_rev" value="75+"><div class="choice-mark"></div><span class="choice-text">75%+</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Market Landscape -->
+  <div class="step" id="s3">
+    <div class="section-label">Section 3 of 12</div>
+    <div class="section-title">Market landscape</div>
+    <div class="section-desc">Tell us about your current markets and what's shaping your industry.</div>
+
+    <div class="q"><label class="q-label">Geographic markets you currently serve</label><input type="text" name="geo_current" placeholder="e.g. Southeast US, National, Global"></div>
+    <div class="q"><label class="q-label">New markets or regions you want to expand into</label><input type="text" name="geo_expand" placeholder="e.g. Northeast, Canada…"></div>
+
+    <div class="q"><label class="q-label">Does your business have seasonal demand patterns?</label>
+      <div class="choices" id="seasonal">
+        <label class="choice"><input type="radio" name="seasonal" value="strong"><div class="choice-mark"></div><span class="choice-text">Yes — strong seasonality</span></label>
+        <label class="choice"><input type="radio" name="seasonal" value="mild"><div class="choice-mark"></div><span class="choice-text">Somewhat — mild variation</span></label>
+        <label class="choice"><input type="radio" name="seasonal" value="none"><div class="choice-mark"></div><span class="choice-text">No — demand is fairly steady year-round</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">What industry trends or changes are affecting your business right now?</label><textarea name="trends" placeholder="New technology, customer behavior shifts, regulation…"></textarea></div>
+
+    <div class="q"><label class="q-label">What changes in your industry concern you most? (select all that apply)</label>
+      <div class="choices" id="concerns-check">
+        <label class="choice"><input type="checkbox" name="concerns" value="new_competitors"><div class="choice-check"></div><span class="choice-text">New competitors entering the market</span></label>
+        <label class="choice"><input type="checkbox" name="concerns" value="pricing_pressure"><div class="choice-check"></div><span class="choice-text">Pricing pressure</span></label>
+        <label class="choice"><input type="checkbox" name="concerns" value="regulation"><div class="choice-check"></div><span class="choice-text">Regulatory changes</span></label>
+        <label class="choice"><input type="checkbox" name="concerns" value="tech_disruption"><div class="choice-check"></div><span class="choice-text">Technology disruption</span></label>
+        <label class="choice"><input type="checkbox" name="concerns" value="talent"><div class="choice-check"></div><span class="choice-text">Talent / staffing challenges</span></label>
+        <label class="choice"><input type="checkbox" name="concerns" value="economy"><div class="choice-check"></div><span class="choice-text">Economic uncertainty</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Competitor Landscape -->
+  <div class="step" id="s4">
+    <div class="section-label">Section 4 of 12</div>
+    <div class="section-title">Competitor landscape</div>
+    <div class="section-desc">Understanding your competition helps us sharpen your positioning.</div>
+
+    <div class="q"><label class="q-label">Primary competitors</label><textarea name="competitors" placeholder="List 2–5 competitors…"></textarea></div>
+    <div class="q"><label class="q-label">Competitors you frequently lose business to</label><input type="text" name="competitors_lose_to" placeholder="Name them if known…"></div>
+    <div class="q"><label class="q-label">What do competitors do well?</label><textarea name="competitor_strengths" placeholder="Be honest — what are their strengths?"></textarea></div>
+    <div class="q"><label class="q-label">Where do competitors fall short?</label><textarea name="competitor_weaknesses" placeholder="Gaps you can exploit…"></textarea></div>
+
+    <div class="q"><label class="q-label">Top reasons prospects choose you over a competitor (select up to 3)</label>
+      <div class="choices" id="why-choose">
+        <label class="choice"><input type="checkbox" name="why_choose" value="quality"><div class="choice-check"></div><span class="choice-text">Better quality or results</span></label>
+        <label class="choice"><input type="checkbox" name="why_choose" value="price"><div class="choice-check"></div><span class="choice-text">Lower or more competitive pricing</span></label>
+        <label class="choice"><input type="checkbox" name="why_choose" value="reputation"><div class="choice-check"></div><span class="choice-text">Stronger reputation or trust</span></label>
+        <label class="choice"><input type="checkbox" name="why_choose" value="speed"><div class="choice-check"></div><span class="choice-text">Faster delivery or turnaround</span></label>
+        <label class="choice"><input type="checkbox" name="why_choose" value="service"><div class="choice-check"></div><span class="choice-text">Better customer service</span></label>
+        <label class="choice"><input type="checkbox" name="why_choose" value="expertise"><div class="choice-check"></div><span class="choice-text">More specialized expertise</span></label>
+        <label class="choice"><input type="checkbox" name="why_choose" value="simplicity"><div class="choice-check"></div><span class="choice-text">Easier to work with / simpler process</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Target Audience -->
+  <div class="step" id="s5">
+    <div class="section-label">Section 5 of 12</div>
+    <div class="section-title">Target audience</div>
+    <div class="section-desc">Who are you selling to, and what drives their decisions?</div>
+
+    <div class="q"><label class="q-label">Who is your ideal customer?</label><input type="text" name="ideal_customer" placeholder="e.g. homeowners, healthcare providers, mid-market manufacturers…"></div>
+    <div class="q"><label class="q-label">Describe your typical customer</label><textarea name="typical_customer" placeholder="Industry, size, role, needs…"></textarea></div>
+    <div class="q"><label class="q-label">What problem are customers trying to solve when they come to you?</label><textarea name="customer_problem" placeholder="The core pain or challenge they're facing…"></textarea></div>
+
+    <div class="q"><label class="q-label">Who is typically involved in the purchase decision? (select all that apply)</label>
+      <div class="choices" id="decision-makers">
+        <label class="choice"><input type="checkbox" name="decision_makers" value="owner"><div class="choice-check"></div><span class="choice-text">Owner / Founder</span></label>
+        <label class="choice"><input type="checkbox" name="decision_makers" value="ops_manager"><div class="choice-check"></div><span class="choice-text">Operations manager</span></label>
+        <label class="choice"><input type="checkbox" name="decision_makers" value="marketing"><div class="choice-check"></div><span class="choice-text">Marketing team</span></label>
+        <label class="choice"><input type="checkbox" name="decision_makers" value="procurement"><div class="choice-check"></div><span class="choice-text">Procurement / Finance</span></label>
+        <label class="choice"><input type="checkbox" name="decision_makers" value="exec"><div class="choice-check"></div><span class="choice-text">Executive leadership</span></label>
+        <label class="choice"><input type="checkbox" name="decision_makers" value="multi"><div class="choice-check"></div><span class="choice-text">Multiple stakeholders</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">What factors most influence their decision to buy? (select all that apply)</label>
+      <div class="choices" id="buy-factors">
+        <label class="choice"><input type="checkbox" name="buy_factors" value="price"><div class="choice-check"></div><span class="choice-text">Price / value</span></label>
+        <label class="choice"><input type="checkbox" name="buy_factors" value="quality"><div class="choice-check"></div><span class="choice-text">Quality of product or service</span></label>
+        <label class="choice"><input type="checkbox" name="buy_factors" value="speed"><div class="choice-check"></div><span class="choice-text">Speed / turnaround</span></label>
+        <label class="choice"><input type="checkbox" name="buy_factors" value="reputation"><div class="choice-check"></div><span class="choice-text">Reputation or reviews</span></label>
+        <label class="choice"><input type="checkbox" name="buy_factors" value="referral"><div class="choice-check"></div><span class="choice-text">Referral or word-of-mouth</span></label>
+        <label class="choice"><input type="checkbox" name="buy_factors" value="relationship"><div class="choice-check"></div><span class="choice-text">Relationship or trust</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Customer Journey -->
+  <div class="step" id="s6">
+    <div class="section-label">Section 6 of 12</div>
+    <div class="section-title">Customer journey</div>
+    <div class="section-desc">Walk us through how prospects become customers.</div>
+
+    <div class="q"><label class="q-label">How do most customers first hear about your business? (select all that apply)</label>
+      <div class="choices" id="first-hear">
+        <label class="choice"><input type="checkbox" name="first_hear" value="search"><div class="choice-check"></div><span class="choice-text">Search engines (Google, Bing)</span></label>
+        <label class="choice"><input type="checkbox" name="first_hear" value="referrals"><div class="choice-check"></div><span class="choice-text">Referrals from existing customers</span></label>
+        <label class="choice"><input type="checkbox" name="first_hear" value="social"><div class="choice-check"></div><span class="choice-text">Social media</span></label>
+        <label class="choice"><input type="checkbox" name="first_hear" value="paid_ads"><div class="choice-check"></div><span class="choice-text">Paid advertising</span></label>
+        <label class="choice"><input type="checkbox" name="first_hear" value="events"><div class="choice-check"></div><span class="choice-text">Events or trade shows</span></label>
+        <label class="choice"><input type="checkbox" name="first_hear" value="partnerships"><div class="choice-check"></div><span class="choice-text">Partnerships or integrations</span></label>
+        <label class="choice"><input type="checkbox" name="first_hear" value="cold_outreach"><div class="choice-check"></div><span class="choice-text">Cold outreach</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">How long does it typically take for a prospect to become a customer?</label>
+      <div class="choices" id="sales-cycle">
+        <label class="choice"><input type="radio" name="sales_cycle" value="less_week"><div class="choice-mark"></div><span class="choice-text">Less than a week</span></label>
+        <label class="choice"><input type="radio" name="sales_cycle" value="1_4_weeks"><div class="choice-mark"></div><span class="choice-text">1 – 4 weeks</span></label>
+        <label class="choice"><input type="radio" name="sales_cycle" value="1_3_months"><div class="choice-mark"></div><span class="choice-text">1 – 3 months</span></label>
+        <label class="choice"><input type="radio" name="sales_cycle" value="3_6_months"><div class="choice-mark"></div><span class="choice-text">3 – 6 months</span></label>
+        <label class="choice"><input type="radio" name="sales_cycle" value="6_plus"><div class="choice-mark"></div><span class="choice-text">6+ months</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">Which stage of the buying process is most challenging today?</label>
+      <div class="choices" id="hardest-stage">
+        <label class="choice"><input type="radio" name="hardest_stage" value="awareness"><div class="choice-mark"></div><span class="choice-text">Getting noticed in the market</span></label>
+        <label class="choice"><input type="radio" name="hardest_stage" value="lead_gen"><div class="choice-mark"></div><span class="choice-text">Generating leads</span></label>
+        <label class="choice"><input type="radio" name="hardest_stage" value="converting"><div class="choice-mark"></div><span class="choice-text">Converting leads to opportunities</span></label>
+        <label class="choice"><input type="radio" name="hardest_stage" value="closing"><div class="choice-mark"></div><span class="choice-text">Closing sales</span></label>
+        <label class="choice"><input type="radio" name="hardest_stage" value="retention"><div class="choice-mark"></div><span class="choice-text">Retaining customers</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">What questions or concerns do customers commonly have before buying?</label><textarea name="pre_buy_concerns" placeholder="Price, trust, timeline, ROI…"></textarea></div>
+  </div>
+
+  <!-- SECTION 7: Current Marketing -->
+  <div class="step" id="s7">
+    <div class="section-label">Section 7 of 12</div>
+    <div class="section-title">Current marketing</div>
+    <div class="section-desc">Tell us what you're doing today and what's working.</div>
+
+    <div class="q"><label class="q-label">Marketing channels currently in use (select all that apply)</label>
+      <div class="choices" id="channels">
+        <label class="choice"><input type="checkbox" name="channels" value="seo"><div class="choice-check"></div><span class="choice-text">Website / SEO</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="google_ads"><div class="choice-check"></div><span class="choice-text">Google Ads (PPC)</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="social_organic"><div class="choice-check"></div><span class="choice-text">Social media (organic)</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="social_paid"><div class="choice-check"></div><span class="choice-text">Social media (paid)</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="email"><div class="choice-check"></div><span class="choice-text">Email marketing</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="events"><div class="choice-check"></div><span class="choice-text">Events / trade shows</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="referral"><div class="choice-check"></div><span class="choice-text">Referral program</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="partnerships"><div class="choice-check"></div><span class="choice-text">Partnerships</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="print"><div class="choice-check"></div><span class="choice-text">Print / direct mail</span></label>
+        <label class="choice"><input type="checkbox" name="channels" value="content"><div class="choice-check"></div><span class="choice-text">Content marketing / blog</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">Which marketing channel generates the most leads today?</label><input type="text" name="top_lead_channel" placeholder="e.g. referrals, Google Ads…"></div>
+    <div class="q"><label class="q-label">Which marketing activities have worked best? Why?</label><textarea name="marketing_wins" placeholder="Best-performing campaigns, channels, or tactics…"></textarea></div>
+    <div class="q"><label class="q-label">Which marketing activities have not worked well?</label><textarea name="marketing_losses" placeholder="What's fallen flat or been a waste…"></textarea></div>
+  </div>
+
+  <!-- SECTION 8: Sales Process -->
+  <div class="step" id="s8">
+    <div class="section-label">Section 8 of 12</div>
+    <div class="section-title">Sales process</div>
+    <div class="section-desc">How do deals get done — and where do they stall?</div>
+
+    <div class="q"><label class="q-label">What does your typical sales process look like?</label><textarea name="sales_process" placeholder="e.g. inquiry → consultation → proposal → close…"></textarea></div>
+
+    <div class="q"><label class="q-label">Most common sales objections (select all that apply)</label>
+      <div class="choices" id="objections">
+        <label class="choice"><input type="checkbox" name="objections" value="price"><div class="choice-check"></div><span class="choice-text">Price is too high</span></label>
+        <label class="choice"><input type="checkbox" name="objections" value="timing"><div class="choice-check"></div><span class="choice-text">Bad timing / not a priority right now</span></label>
+        <label class="choice"><input type="checkbox" name="objections" value="trust"><div class="choice-check"></div><span class="choice-text">Not enough trust or credibility yet</span></label>
+        <label class="choice"><input type="checkbox" name="objections" value="competitor"><div class="choice-check"></div><span class="choice-text">Chosen a competitor</span></label>
+        <label class="choice"><input type="checkbox" name="objections" value="roi"><div class="choice-check"></div><span class="choice-text">Unclear on value or ROI</span></label>
+        <label class="choice"><input type="checkbox" name="objections" value="committee"><div class="choice-check"></div><span class="choice-text">Decision by committee takes too long</span></label>
+        <label class="choice"><input type="checkbox" name="objections" value="internal_solution"><div class="choice-check"></div><span class="choice-text">Already have an internal solution</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">What are the most common reasons prospects decide not to move forward?</label><textarea name="deal_killers" placeholder="Beyond objections — what causes deals to die?"></textarea></div>
+  </div>
+
+  <!-- SECTION 9: Messaging & Brand -->
+  <div class="step" id="s9">
+    <div class="section-label">Section 9 of 12</div>
+    <div class="section-title">Messaging &amp; brand</div>
+    <div class="section-desc">How does your brand show up, and what should it communicate?</div>
+
+    <div class="q"><label class="q-label">Brand personality (select all that apply)</label>
+      <div class="choices" id="brand-personality">
+        <label class="choice"><input type="checkbox" name="brand_personality" value="professional"><div class="choice-check"></div><span class="choice-text">Professional &amp; authoritative</span></label>
+        <label class="choice"><input type="checkbox" name="brand_personality" value="friendly"><div class="choice-check"></div><span class="choice-text">Friendly &amp; approachable</span></label>
+        <label class="choice"><input type="checkbox" name="brand_personality" value="innovative"><div class="choice-check"></div><span class="choice-text">Innovative &amp; forward-thinking</span></label>
+        <label class="choice"><input type="checkbox" name="brand_personality" value="premium"><div class="choice-check"></div><span class="choice-text">Premium &amp; exclusive</span></label>
+        <label class="choice"><input type="checkbox" name="brand_personality" value="bold"><div class="choice-check"></div><span class="choice-text">Bold &amp; energetic</span></label>
+        <label class="choice"><input type="checkbox" name="brand_personality" value="reliable"><div class="choice-check"></div><span class="choice-text">Reliable &amp; trustworthy</span></label>
+        <label class="choice"><input type="checkbox" name="brand_personality" value="data_driven"><div class="choice-check"></div><span class="choice-text">Data-driven &amp; analytical</span></label>
+      </div>
+    </div>
+
+    <div class="q">
+      <label class="q-label">Rate how strongly you agree with each brand statement</label>
+      <div class="likert">
+        <table class="likert-table">
+          <thead><tr>
+            <th>Statement</th>
+            <th>Strongly<br>disagree</th><th>Disagree</th><th>Neutral</th><th>Agree</th><th>Strongly<br>agree</th>
+          </tr></thead>
+          <tbody>
+            <tr data-row="b1">
+              <td class="stmt">Our brand is clearly differentiated in the market</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="b2">
+              <td class="stmt">Our messaging is consistent across all channels</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="b3">
+              <td class="stmt">Customers understand what we do and why it matters</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="b4">
+              <td class="stmt">We're proud of how our brand looks and feels today</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">What do you want customers to feel when they interact with your brand?</label><textarea name="brand_feeling" placeholder="Confident, relieved, excited, impressed…"></textarea></div>
+    <div class="q"><label class="q-label">Are there key messages or themes you want marketing to emphasize?</label><textarea name="key_messages" placeholder="e.g. 'We're the fastest', 'Family-owned since 1998'…"></textarea></div>
+  </div>
+
+  <!-- SECTION 10: Growth Opportunities -->
+  <div class="step" id="s10">
+    <div class="section-label">Section 10 of 12</div>
+    <div class="section-title">Growth opportunities</div>
+    <div class="section-desc">Where do you see the biggest upside for your business?</div>
+
+    <div class="q">
+      <label class="q-label">Rate how much you agree with each growth statement</label>
+      <div class="likert">
+        <table class="likert-table">
+          <thead><tr>
+            <th>Statement</th>
+            <th>Strongly<br>disagree</th><th>Disagree</th><th>Neutral</th><th>Agree</th><th>Strongly<br>agree</th>
+          </tr></thead>
+          <tbody>
+            <tr data-row="g1">
+              <td class="stmt">We have untapped potential in our existing customer base</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="g2">
+              <td class="stmt">There are new markets we're well-positioned to enter</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="g3">
+              <td class="stmt">Our pricing leaves room to move upmarket</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="g4">
+              <td class="stmt">We have services or products we haven't fully marketed yet</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">What new products, services, or offerings are you planning to introduce?</label><textarea name="new_offerings" placeholder="Upcoming launches or additions…"></textarea></div>
+    <div class="q"><label class="q-label">Are there industries or customer types you want to target more aggressively?</label><textarea name="target_segments" placeholder="Underserved segments or verticals…"></textarea></div>
+    <div class="q"><label class="q-label">If you could double one part of your business tomorrow, what would it be and why?</label><textarea name="double_down" placeholder="Be specific — this tells us a lot…"></textarea></div>
+  </div>
+
+  <!-- SECTION 11: Marketing Investment -->
+  <div class="step" id="s11">
+    <div class="section-label">Section 11 of 12</div>
+    <div class="section-title">Marketing investment</div>
+    <div class="section-desc">Understanding your budget helps us build a realistic strategy.</div>
+
+    <div class="q"><label class="q-label">Do you currently have a dedicated marketing budget?</label>
+      <div class="choices" id="has-budget">
+        <label class="choice"><input type="radio" name="has_budget" value="yes"><div class="choice-mark"></div><span class="choice-text">Yes — we have a defined budget</span></label>
+        <label class="choice"><input type="radio" name="has_budget" value="informal"><div class="choice-mark"></div><span class="choice-text">Somewhat — it's informal or ad hoc</span></label>
+        <label class="choice"><input type="radio" name="has_budget" value="no"><div class="choice-mark"></div><span class="choice-text">No — we haven't established one yet</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">Approximate annual marketing budget</label>
+      <div class="choices" id="budget-range">
+        <label class="choice"><input type="radio" name="budget_range" value="under_10k"><div class="choice-mark"></div><span class="choice-text">Under $10K</span></label>
+        <label class="choice"><input type="radio" name="budget_range" value="10_50k"><div class="choice-mark"></div><span class="choice-text">$10K – $50K</span></label>
+        <label class="choice"><input type="radio" name="budget_range" value="50_150k"><div class="choice-mark"></div><span class="choice-text">$50K – $150K</span></label>
+        <label class="choice"><input type="radio" name="budget_range" value="150_500k"><div class="choice-mark"></div><span class="choice-text">$150K – $500K</span></label>
+        <label class="choice"><input type="radio" name="budget_range" value="500k_plus"><div class="choice-mark"></div><span class="choice-text">$500K+</span></label>
+        <label class="choice"><input type="radio" name="budget_range" value="prefer_not"><div class="choice-mark"></div><span class="choice-text">Prefer not to say</span></label>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">Which initiatives would you like to prioritize? (select all that apply)</label>
+      <div class="choices" id="priorities">
+        <label class="choice"><input type="checkbox" name="priorities" value="lead_gen"><div class="choice-check"></div><span class="choice-text">Lead generation</span></label>
+        <label class="choice"><input type="checkbox" name="priorities" value="brand_awareness"><div class="choice-check"></div><span class="choice-text">Brand awareness</span></label>
+        <label class="choice"><input type="checkbox" name="priorities" value="seo_web"><div class="choice-check"></div><span class="choice-text">Website &amp; SEO</span></label>
+        <label class="choice"><input type="checkbox" name="priorities" value="content"><div class="choice-check"></div><span class="choice-text">Content &amp; thought leadership</span></label>
+        <label class="choice"><input type="checkbox" name="priorities" value="paid_ads"><div class="choice-check"></div><span class="choice-text">Paid advertising</span></label>
+        <label class="choice"><input type="checkbox" name="priorities" value="social"><div class="choice-check"></div><span class="choice-text">Social media presence</span></label>
+        <label class="choice"><input type="checkbox" name="priorities" value="new_markets"><div class="choice-check"></div><span class="choice-text">Entering new markets</span></label>
+        <label class="choice"><input type="checkbox" name="priorities" value="recruiting"><div class="choice-check"></div><span class="choice-text">Recruiting / employer brand</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 12: Success Metrics -->
+  <div class="step" id="s12">
+    <div class="section-label">Section 12 of 12</div>
+    <div class="section-title">Success metrics &amp; anything else</div>
+    <div class="section-desc">Last section — what does winning look like for you?</div>
+
+    <div class="q">
+      <label class="q-label">How important are each of these outcomes to your leadership team?</label>
+      <div class="likert">
+        <table class="likert-table">
+          <thead><tr>
+            <th>Outcome</th>
+            <th>Not at all</th><th>Slightly</th><th>Moderately</th><th>Very</th><th>Critical</th>
+          </tr></thead>
+          <tbody>
+            <tr data-row="m1">
+              <td class="stmt">Revenue growth</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="m2">
+              <td class="stmt">More leads in the pipeline</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="m3">
+              <td class="stmt">Stronger brand recognition</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="m4">
+              <td class="stmt">Higher-value customers</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+            <tr data-row="m5">
+              <td class="stmt">Lower customer acquisition cost</td>
+              <td><div class="likert-radio" data-v="1"></div></td><td><div class="likert-radio" data-v="2"></div></td>
+              <td><div class="likert-radio" data-v="3"></div></td><td><div class="likert-radio" data-v="4"></div></td>
+              <td><div class="likert-radio" data-v="5"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="q"><label class="q-label">What would make this marketing strategy a clear success for you?</label><textarea name="success_definition" placeholder="Your definition of a win…"></textarea></div>
+    <div class="q"><label class="q-label">What else should we know about your business, customers, or goals?</label><textarea name="anything_else" placeholder="Anything we haven't covered…"></textarea></div>
+  </div>
+
+  <!-- Complete State -->
+  <div class="complete" id="complete">
+    <div class="complete-icon">✓</div>
+    <h2>Thank you for completing the blueprint questionnaire!</h2>
+    <p>We'll review your responses and use them to build a tailored marketing strategy for your business. You'll hear from us soon.</p>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav" id="nav">
+    <button class="btn" id="btn-back" onclick="navigate(-1)" disabled>← Back</button>
+    <span class="step-count" id="step-count">Step 1 of 12</span>
+    <button class="btn btn-primary" id="btn-next" onclick="navigate(1)">Next →</button>
+  </div>
+
+</div>
+
+<script>
+let current = 1;
+const total = 12;
+
+function navigate(dir) {
+  document.getElementById('s' + current).classList.remove('active');
+  current += dir;
+  if (current > total) {
+    document.getElementById('nav').style.display = 'none';
+    document.getElementById('complete').classList.add('active');
+    document.getElementById('progress').style.width = '100%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  document.getElementById('s' + current).classList.add('active');
+  document.getElementById('btn-back').disabled = current === 1;
+  document.getElementById('btn-next').textContent = current === total ? 'Submit ✓' : 'Next →';
+  document.getElementById('step-count').textContent = 'Step ' + current + ' of ' + total;
+  document.getElementById('progress').style.width = (current / total * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('.choices').forEach(function(group) {
+  group.addEventListener('click', function(e) {
+    var choice = e.target.closest('.choice');
+    if (!choice) return;
+    var inp = choice.querySelector('input');
+    if (!inp) return;
+    if (inp.type === 'radio') {
+      group.querySelectorAll('.choice').forEach(function(c) { c.classList.remove('selected'); });
+      choice.classList.add('selected');
+    } else {
+      choice.classList.toggle('selected');
+    }
+  });
+});
+
+document.querySelectorAll('.likert-radio').forEach(function(radio) {
+  radio.addEventListener('click', function() {
+    var row = radio.closest('tr');
+    row.querySelectorAll('.likert-radio').forEach(function(r) { r.classList.remove('sel'); });
+    radio.classList.add('sel');
+  });
+});
+</script>
+
+</body>
+</html>

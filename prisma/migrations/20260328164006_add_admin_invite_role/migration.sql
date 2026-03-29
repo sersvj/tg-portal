@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "InviteToken" ADD COLUMN     "role" TEXT NOT NULL DEFAULT 'CLIENT',
+ALTER COLUMN "clientId" DROP NOT NULL;

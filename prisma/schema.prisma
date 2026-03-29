@@ -1,0 +1,281 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum MilestoneStatus {
+  LOCKED
+  ACTIVE
+  COMPLETED
+}
+
+enum FieldType {
+  TEXT
+  TEXTAREA
+  SELECT
+  RADIO
+  MULTISELECT
+  BOOLEAN
+  LIKERT
+  CONTENT
+  PAGE_BREAK
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  role          Role      @default(CLIENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Admin relations
+  managedClients    Client[]          @relation("PrimaryAdmin")
+  assignedMilestones ClientMilestone[] @relation("AssignedBy")
+
+  // Client relations
+  clientAccess  ClientUser[]
+
+  // NextAuth
+  accounts      Account[]
+  sessions      Session[]
+  inviteTokens  InviteToken[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model InviteToken {
+  id        String   @id @default(cuid())
+  token     String   @unique @default(cuid())
+  email     String
+  role      String   @default("CLIENT")
+  clientId  String?
+  createdBy String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator   User     @relation(fields: [createdBy], references: [id])
+}
+
+model Client {
+  id             String   @id @default(cuid())
+  companyName    String
+  industry       String?
+  website        String?
+  logoUrl        String?
+  primaryAdminId String
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  primaryAdmin   User              @relation("PrimaryAdmin", fields: [primaryAdminId], references: [id])
+  contacts       ClientContact[]
+  milestones     ClientMilestone[]
+  inviteTokens   InviteToken[]
+  clientUsers    ClientUser[]
+  links          ClientLink[]
+}
+
+model ClientLink {
+  id          String   @id @default(cuid())
+  clientId    String
+  type        String   // WEBSITE_DESIGN | STAGING_WEBSITE | DESIGN_MATERIALS | PRESENTATION
+  title       String
+  url         String
+  description String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+model ClientContact {
+  id        String  @id @default(cuid())
+  clientId  String
+  name      String
+  title     String?
+  phone     String?
+  email     String
+  isPrimary Boolean @default(false)
+  order     Int     @default(0)
+
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
+// Links a client-role User to a specific Client
+model ClientUser {
+  id        String   @id @default(cuid())
+  clientId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, userId])
+}
+
+model MilestoneDefinition {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String   // questionnaire | brand_assets | content_docs | supporting_materials
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  clientMilestones    ClientMilestone[]
+  questionnaireFields QuestionnaireField[]
+}
+
+model ClientMilestone {
+  id                    String          @id @default(cuid())
+  clientId              String
+  milestoneDefinitionId String
+  status                MilestoneStatus @default(LOCKED)
+  order                 Int             @default(0)
+  assignedAt            DateTime        @default(now())
+  completedAt           DateTime?
+  assignedByAdminId     String
+
+  client              Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  milestoneDefinition MilestoneDefinition @relation(fields: [milestoneDefinitionId], references: [id])
+  assignedBy          User                @relation("AssignedBy", fields: [assignedByAdminId], references: [id])
+
+  instructions      String?
+  dropboxFolderPath String?
+  draftAnswers      Json?
+
+  questionnaireFields    QuestionnaireField[]
+  questionnaireResponses QuestionnaireResponse[]
+  uploadedFiles          MilestoneFile[]
+}
+
+model MilestoneFile {
+  id          String   @id @default(cuid())
+  milestoneId String
+  filename    String
+  dropboxPath String
+  sizeBytes   Int
+  uploadedAt  DateTime @default(now())
+
+  milestone   ClientMilestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+}
+
+model QuestionnaireTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  fields    QuestionnaireField[]
+}
+
+model QuestionnaireField {
+  id                String    @id @default(cuid())
+  label             String
+  fieldType         FieldType @default(TEXT)
+  options           Json?     // for SELECT / MULTISELECT
+  required          Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  order             Int       @default(0)
+  helpText          String?
+
+  // Belongs to one of: MilestoneDefinition (template), ClientMilestone (per-client clone), or QuestionnaireTemplate
+  templateId            String?
+  clientMilestoneId     String?
+  milestoneDefinitionId String?
+
+  template            QuestionnaireTemplate? @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  clientMilestone     ClientMilestone?       @relation(fields: [clientMilestoneId], references: [id], onDelete: Cascade)
+  milestoneDefinition MilestoneDefinition?   @relation(fields: [milestoneDefinitionId], references: [id], onDelete: Cascade)
+
+  answers           QuestionnaireAnswer[]
+}
+
+model QuestionnaireResponse {
+  id                String   @id @default(cuid())
+  clientMilestoneId String
+  submittedByUserId String
+  submittedAt       DateTime @default(now())
+
+  clientMilestone   ClientMilestone   @relation(fields: [clientMilestoneId], references: [id], onDelete: Cascade)
+  answers           QuestionnaireAnswer[]
+}
+
+model QuestionnaireAnswer {
+  id         String @id @default(cuid())
+  responseId String
+  fieldId    String
+  value      Json   // string, array, boolean depending on field type
+
+  response   QuestionnaireResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  field      QuestionnaireField    @relation(fields: [fieldId], references: [id])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+
+  actorType   String   // "ADMIN" | "CLIENT" | "SYSTEM"
+  actorId     String
+  actorName   String
+  actorEmail  String
+
+  action      String   // e.g. "CLIENT_CREATED", "MILESTONE_SUBMITTED"
+
+  clientId    String?  // scope filter for client-detail view — not a FK
+
+  subjectType String?  // "CLIENT" | "MILESTONE" | "LINK" | "ADMIN" | "DEFINITION"
+  subjectId   String?
+  subjectName String?
+
+  metadata    Json?
+
+  @@index([clientId])
+  @@index([actorId])
+  @@index([createdAt])
+}
