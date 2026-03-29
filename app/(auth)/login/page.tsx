@@ -98,6 +98,10 @@ export default function LoginPage() {
               >
                 Sign in
               </Button>
+
+              <Text ta="center" size="xs" c="gray.5">
+                <a href="/forgot-password" style={{ color: "inherit" }}>Forgot your password?</a>
+              </Text>
             </Stack>
           </form>
         </Paper>

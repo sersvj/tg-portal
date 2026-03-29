@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { cookies } from "next/headers";
 import { AppShell, AppShellHeader, AppShellFooter, AppShellMain, Group, Text, Button, Box } from "@mantine/core";
-import { LogOut } from "lucide-react";
+import { LogOut, UserCircle } from "lucide-react";
+import { LinkAnchor } from "@/components/ui/link-components";
 import { signOut } from "@/lib/auth";
 import Image from "next/image";
 import { BRAND } from "@/lib/theme";
@@ -78,23 +79,36 @@ export default async function PortalLayout({ children }: { children: React.React
             </div>
           </Group>
 
-          {/* Sign out */}
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-          >
-            <Button
-              type="submit"
-              variant="subtle"
-              color="gray"
-              size="xs"
-              leftSection={<LogOut size={13} />}
+          {/* Account + Sign out */}
+          <Group gap="xs">
+            {!isPreview && (
+              <LinkAnchor
+                href="/portal/account"
+                size="xs"
+                c="gray.5"
+                style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+              >
+                <UserCircle size={13} />
+                Account
+              </LinkAnchor>
+            )}
+            <form
+              action={async () => {
+                "use server";
+                await signOut({ redirectTo: "/login" });
+              }}
             >
-              Sign out
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                variant="subtle"
+                color="gray"
+                size="xs"
+                leftSection={<LogOut size={13} />}
+              >
+                Sign out
+              </Button>
+            </form>
+          </Group>
         </Group>
       </AppShellHeader>
 

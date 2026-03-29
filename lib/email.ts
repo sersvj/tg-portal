@@ -44,6 +44,25 @@ export async function sendAdminInviteEmail({
   });
 }
 
+export async function sendPasswordResetEmail({
+  to,
+  resetUrl,
+}: {
+  to: string;
+  resetUrl: string;
+}) {
+  return resend.emails.send({
+    from: `TG Portal <${FROM}>`,
+    to,
+    subject: "Reset your T/G Portal password",
+    html: `
+      <p>We received a request to reset your T/G Portal password.</p>
+      <p><a href="${resetUrl}">Click here to reset your password</a></p>
+      <p>This link expires in 1 hour. If you didn't request this, you can safely ignore this email.</p>
+    `,
+  });
+}
+
 export async function sendAdminNotification({
   to,
   clientName,

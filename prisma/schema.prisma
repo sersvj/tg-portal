@@ -256,6 +256,15 @@ model QuestionnaireAnswer {
   field      QuestionnaireField    @relation(fields: [fieldId], references: [id])
 }
 
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique @default(cuid())
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
 model ActivityLog {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())

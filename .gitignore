@@ -26,6 +26,7 @@
 
 # local scripts (not for repo)
 scripts/reset-db.ts
+scripts/reset-password.ts
 
 # AI/agent working files
 CLAUDE.md

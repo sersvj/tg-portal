@@ -19,6 +19,7 @@ import {
   Flag,
   LogOut,
   UsersRound,
+  UserCircle,
 } from "lucide-react";
 import { BRAND } from "@/lib/theme";
 
@@ -76,8 +77,22 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </Stack>
 
-      {/* Sign out */}
+      {/* Profile + Sign out */}
       <Divider mt="xs" mb="xs" />
+      <NavLink
+        component={Link}
+        href="/admin/profile"
+        label="Profile"
+        leftSection={<UserCircle size={16} strokeWidth={pathname === "/admin/profile" ? 2.5 : 1.75} />}
+        active={pathname === "/admin/profile"}
+        color="blue"
+        onClick={onNavigate}
+        styles={{
+          root: pathname === "/admin/profile"
+            ? { boxShadow: "inset 3px 0 0 var(--mantine-color-blue-6)" }
+            : undefined,
+        }}
+      />
       <UnstyledButton
         px="sm"
         py="xs"

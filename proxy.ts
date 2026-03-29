@@ -9,7 +9,7 @@ export default async function proxy(req: NextRequest) {
   const isLoggedIn = !!session;
   const isAdmin = session?.user?.role === "ADMIN";
 
-  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/invite");
+  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/invite") || pathname.startsWith("/forgot-password") || pathname.startsWith("/reset-password");
   const isAdminRoute = pathname.startsWith("/admin");
   const isPortalRoute = pathname.startsWith("/portal");
 
