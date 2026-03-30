@@ -104,3 +104,16 @@ export async function reorderClientFields(
   );
   revalidatePath(`/admin/clients/${clientId}/milestones/${clientMilestoneId}`);
 }
+
+export async function reopenMilestone(milestoneId: string, clientId: string) {
+  const session = await auth();
+  if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
+
+  await db.clientMilestone.update({
+    where: { id: milestoneId },
+    data: { status: "ACTIVE" },
+  });
+
+  revalidatePath(`/admin/clients/${clientId}/milestones/${milestoneId}`);
+  revalidatePath(`/admin/clients/${clientId}`);
+}

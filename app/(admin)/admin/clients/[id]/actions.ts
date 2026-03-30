@@ -213,7 +213,7 @@ export async function sendInvite(clientId: string, toEmail: string) {
     },
   });
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+  const baseUrl = process.env.NEXTAUTH_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
   const inviteUrl = `${baseUrl}/invite/${token.token}`;
 
   // Try to send email — fails silently if Resend not configured
@@ -314,6 +314,30 @@ export async function toggleClientActive(clientId: string, isActive: boolean) {
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath("/admin/clients");
   revalidatePath("/admin");
+}
+
+export async function reopenMilestone(clientMilestoneId: string, clientId: string) {
+  const session = await auth();
+  if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
+
+  const milestone = await db.clientMilestone.update({
+    where: { id: clientMilestoneId },
+    data: { status: "ACTIVE" },
+    include: { milestoneDefinition: { select: { name: true } } },
+  });
+
+  await logActivity({
+    actorType: "ADMIN",
+    actorId: session.user.id,
+    actorName: session.user.name ?? session.user.email ?? "",
+    actorEmail: session.user.email ?? "",
+    action: "MILESTONE_REOPENED",
+    clientId,
+    subject: { type: "MILESTONE", id: clientMilestoneId, name: milestone.milestoneDefinition.name },
+  });
+
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath(`/admin/clients/${clientId}/milestones/${clientMilestoneId}`);
 }
 
 export async function reorderClientLinks(clientId: string, orderedIds: string[]) {

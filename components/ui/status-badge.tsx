@@ -22,8 +22,9 @@ export function MilestoneStatusBadge({ status }: { status: MilestoneStatus }) {
 const TYPE_LABEL: Record<string, string> = {
   questionnaire:        "Questionnaire",
   brand_assets:         "Brand Assets",
-  content_docs:         "Content Docs",
+  content_docs:         "Content Assets",
   supporting_materials: "Supporting Materials",
+  staff_profiles:       "Staff Profiles",
 };
 
 export function MilestoneTypeBadge({ type }: { type: string }) {

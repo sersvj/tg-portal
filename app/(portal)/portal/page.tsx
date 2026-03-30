@@ -22,7 +22,7 @@ async function getPortalData(userId: string) {
           milestones: {
             include: {
               milestoneDefinition: true,
-              _count: { select: { uploadedFiles: true } },
+              _count: { select: { uploadedFiles: true, staffProfiles: true } },
             },
             orderBy: { order: "asc" },
           },
@@ -43,7 +43,7 @@ async function getPortalDataByClientId(clientId: string) {
       milestones: {
         include: {
           milestoneDefinition: true,
-          _count: { select: { uploadedFiles: true } },
+          _count: { select: { uploadedFiles: true, staffProfiles: true } },
         },
         orderBy: { order: "asc" },
       },
@@ -59,20 +59,22 @@ type MilestoneRow = {
   completedAt: Date | null;
   draftAnswers: unknown;
   milestoneDefinition: { name: string; description: string | null; type: string };
-  _count: { uploadedFiles: number };
+  _count: { uploadedFiles: number; staffProfiles: number };
 };
 
-function MilestoneItem({ milestone, index, isPreview }: { milestone: MilestoneRow; index: number; isPreview?: boolean }) {
+function MilestoneItem({ milestone, index }: { milestone: MilestoneRow; index: number }) {
   const { status, milestoneDefinition: def, completedAt } = milestone;
   const isLocked    = status === "LOCKED";
   const isActive    = status === "ACTIVE";
   const isDone      = status === "COMPLETED";
-  const isUpload    = def.type !== "questionnaire";
   const fileCount   = milestone._count.uploadedFiles;
+  const staffCount  = milestone._count.staffProfiles;
   const hasDraft    = def.type === "questionnaire" && milestone.draftAnswers !== null;
 
   const href = def.type === "questionnaire"
     ? `/portal/questionnaire/${milestone.id}`
+    : def.type === "staff_profiles"
+    ? `/portal/staff/${milestone.id}`
     : `/portal/upload/${milestone.id}`;
 
   const rowStyle = {
@@ -116,7 +118,9 @@ function MilestoneItem({ milestone, index, isPreview }: { milestone: MilestoneRo
         {isActive && (
           <Group gap={4}>
             <Text size="xs" fw={600} c="orange.7">
-              {isUpload && fileCount > 0
+              {def.type === "staff_profiles" && staffCount > 0
+                ? `${staffCount} added · Continue`
+                : def.type !== "questionnaire" && fileCount > 0
                 ? `${fileCount} file${fileCount !== 1 ? "s" : ""} · Continue`
                 : hasDraft ? "Continue" : "Start"}
             </Text>
@@ -294,7 +298,7 @@ export default async function PortalPage() {
                 }}
               >
                 {milestones.map((milestone, i) => (
-                  <MilestoneItem key={milestone.id} milestone={milestone} index={i} isPreview={isPreview} />
+                  <MilestoneItem key={milestone.id} milestone={milestone} index={i} />
                 ))}
               </Box>
             )}

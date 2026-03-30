@@ -232,8 +232,7 @@ export function UploadForm({ milestoneId, uploadedFiles: initial, hasDropboxFold
             </Button>
             <Button
               fullWidth
-              variant="subtle"
-              color="gray"
+              variant="default"
               onClick={() => router.push("/portal")}
             >
               Save &amp; come back later

@@ -5,13 +5,14 @@ import {
   assignMilestone,
   removeMilestone,
   reorderClientMilestones,
+  reopenMilestone,
 } from "@/app/(admin)/admin/clients/[id]/actions";
 import {
   Stack, Group, Text, Badge, ActionIcon, Button, Divider, Box, Tooltip,
 } from "@mantine/core";
 import {
-  ClipboardList, Upload, ImageIcon, FileText, Settings2,
-  GripVertical, X, Loader2, Plus,
+  ClipboardList, Upload, ImageIcon, FileText, Settings2, Eye, Users,
+  GripVertical, X, Loader2, Plus, RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { MilestoneStatus } from "@prisma/client";
@@ -29,6 +30,7 @@ const typeIcons: Record<string, React.ElementType> = {
   brand_assets:         ImageIcon,
   content_docs:         FileText,
   supporting_materials: Upload,
+  staff_profiles:       Users,
 };
 
 const statusColor: Record<MilestoneStatus, string> = {
@@ -41,12 +43,13 @@ type MilestoneDef       = { id: string; name: string; description: string | null
 type AssignedMilestone  = { id: string; milestoneDefinitionId: string; status: MilestoneStatus; order: number };
 
 function SortableRow({
-  clientId, def, clientMilestone, onRemove, pending,
+  clientId, def, clientMilestone, onRemove, onReopen, pending,
 }: {
   clientId: string;
   def: MilestoneDef;
   clientMilestone: AssignedMilestone;
   onRemove: () => void;
+  onReopen: () => void;
   pending: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -93,8 +96,7 @@ function SortableRow({
           </Badge>
 
           <Tooltip
-            label={clientMilestone.status === "COMPLETED" && def.type === "questionnaire"
-              ? "View responses" : def.type === "questionnaire" ? "Edit fields" : "Configure"}
+            label={clientMilestone.status === "COMPLETED" ? "View" : def.type === "questionnaire" ? "Edit fields" : "Configure"}
           >
             <ActionIcon
               component={Link}
@@ -103,11 +105,23 @@ function SortableRow({
               color={clientMilestone.status === "COMPLETED" ? "green" : "gray"}
               size="sm"
             >
-              <Settings2 size={14} />
+              {clientMilestone.status === "COMPLETED" ? <Eye size={14} /> : <Settings2 size={14} />}
             </ActionIcon>
           </Tooltip>
 
-          {clientMilestone.status !== "COMPLETED" && (
+          {clientMilestone.status === "COMPLETED" ? (
+            <Tooltip label="Reopen">
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                disabled={pending}
+                onClick={onReopen}
+              >
+                {pending ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} />}
+              </ActionIcon>
+            </Tooltip>
+          ) : (
             <Tooltip label="Unassign">
               <ActionIcon
                 variant="subtle"
@@ -186,6 +200,7 @@ export function MilestoneToggle({ clientId, definitions, assigned }: {
                         clientMilestone={cm}
                         pending={pending}
                         onRemove={() => startTransition(() => removeMilestone(cm.id, clientId))}
+                        onReopen={() => startTransition(() => reopenMilestone(cm.id, clientId))}
                       />
                     </Box>
                   );

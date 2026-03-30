@@ -59,6 +59,8 @@ export function NewClientForm({ admins }: { admins: Admin[] }) {
       fd.set("primaryAdminId", primaryAdminId);
       await createClient(fd);
     } catch (err: unknown) {
+      // Next.js redirect() throws internally — let it propagate
+      if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
       setPending(false);
       setError(err instanceof Error ? err.message : "Something went wrong.");
     }

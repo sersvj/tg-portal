@@ -29,7 +29,7 @@ export default async function MilestonesPage() {
   const inactive = definitions.filter((d) => !d.isActive).length;
 
   return (
-    <Stack p={{ base: "md", sm: "xl" }} gap="xl" maw={1000}>
+    <Stack p={{ base: "md", sm: "xl" }} gap="xl" maw={1100}>
       <PageHeader
         title="Milestones"
         subtitle="Define the milestone types available to assign to clients"

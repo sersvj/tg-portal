@@ -59,7 +59,7 @@ export default async function MilestoneDefinitionPage({
   };
 
   return (
-    <Stack p={{ base: "md", sm: "xl" }} gap="lg" maw={900}>
+    <Stack p={{ base: "md", sm: "xl" }} gap="lg" maw={1100}>
       <Box>
         <LinkAnchor
           href="/admin/milestones"

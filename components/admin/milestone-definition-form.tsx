@@ -8,8 +8,9 @@ import { Plus } from "lucide-react";
 const TYPE_OPTIONS = [
   { value: "questionnaire",        label: "Questionnaire" },
   { value: "brand_assets",         label: "Brand Assets" },
-  { value: "content_docs",         label: "Content Docs" },
+  { value: "content_docs",         label: "Content Assets" },
   { value: "supporting_materials", label: "Supporting Materials" },
+  { value: "staff_profiles",       label: "Staff Profiles" },
 ];
 
 export function MilestoneDefinitionForm() {
