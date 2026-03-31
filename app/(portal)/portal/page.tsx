@@ -75,6 +75,8 @@ function MilestoneItem({ milestone, index }: { milestone: MilestoneRow; index: n
     ? `/portal/questionnaire/${milestone.id}`
     : def.type === "staff_profiles"
     ? `/portal/staff/${milestone.id}`
+    : def.type === "page_content"
+    ? `/portal/page-content/${milestone.id}`
     : `/portal/upload/${milestone.id}`;
 
   const rowStyle = {

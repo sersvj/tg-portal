@@ -11,8 +11,10 @@ import { FieldManager } from "@/components/admin/field-manager";
 import { ResponseViewer } from "@/components/admin/response-viewer";
 import { MilestoneConfigForm } from "@/components/admin/milestone-config-form";
 import { StaffProfileViewer } from "@/components/admin/staff-profile-viewer";
+import { PageContentViewer } from "@/components/admin/page-content-viewer";
+import { PageTreeEditor } from "@/components/admin/page-tree-editor";
 import { ReopenButton } from "@/components/admin/reopen-button";
-import { FileText, Users } from "lucide-react";
+import { FileText, Users, BookOpen } from "lucide-react";
 import { createClientField, updateClientField, deleteClientField, reorderClientFields, reopenMilestone } from "./actions";
 
 async function getMilestone(milestoneId: string, clientId: string) {
@@ -24,6 +26,21 @@ async function getMilestone(milestoneId: string, clientId: string) {
       questionnaireFields: { orderBy: { order: "asc" } },
       uploadedFiles: { orderBy: { uploadedAt: "desc" } },
       staffProfiles: { orderBy: { order: "asc" } },
+      pageNodes: {
+        where: { parentId: null },
+        orderBy: { order: "asc" },
+        include: {
+          fields: { orderBy: { order: "asc" } },
+          children: {
+            orderBy: { order: "asc" },
+            include: {
+              fields: { orderBy: { order: "asc" } },
+              answers: { include: { fieldTemplate: true } },
+            },
+          },
+          answers: { include: { fieldTemplate: true } },
+        },
+      },
       questionnaireResponses: {
         orderBy: { submittedAt: "desc" },
         take: 1,
@@ -45,8 +62,17 @@ export default async function ClientMilestoneDetailPage({
   const { milestoneDefinition: def } = milestone;
   const isQuestionnaire  = def.type === "questionnaire";
   const isStaffProfiles  = def.type === "staff_profiles";
+  const isPageContent    = def.type === "page_content";
   const isCompleted      = milestone.status === "COMPLETED";
   const response         = milestone.questionnaireResponses[0] ?? null;
+
+  // Normalize pageNodes: Prisma children don't include their own children (max 2 levels)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pageNodes: any[] = milestone.pageNodes.map((n) => ({
+    ...n,
+    children: n.children.map((c: typeof n.children[0]) => ({ ...c, children: [], fieldTemplates: c.fields ?? [] })),
+    fieldTemplates: n.fields,
+  }));
 
   const fieldActions = {
     create: async (formData: FormData) => {
@@ -75,6 +101,10 @@ export default async function ClientMilestoneDetailPage({
     ? isCompleted
       ? "Submitted staff profiles."
       : "Configure instructions and Dropbox folder for headshot uploads."
+    : isPageContent
+    ? isCompleted
+      ? "Submitted page content."
+      : "Build the page tree for this client. The client will fill in content for each page."
     : "Configure instructions and Dropbox folder for this milestone.";
 
   return (
@@ -151,7 +181,11 @@ export default async function ClientMilestoneDetailPage({
                     description="This milestone is marked complete but has no submitted profiles."
                   />
                 ) : (
-                  <StaffProfileViewer profiles={milestone.staffProfiles} />
+                  <StaffProfileViewer
+                    profiles={milestone.staffProfiles}
+                    clientName={milestone.client.companyName}
+                    milestoneName={def.name}
+                  />
                 )}
               </SectionCard>
               <ReopenButton milestoneId={milestoneId} clientId={clientId} reopenAction={reopenMilestone} />
@@ -169,8 +203,53 @@ export default async function ClientMilestoneDetailPage({
         </Stack>
       )}
 
+      {/* ── Page Content ─────────────────────────────── */}
+      {isPageContent && (
+        <Stack gap="lg">
+          {isCompleted ? (
+            <>
+              <SectionCard
+                title="Page Content"
+                description={`${pageNodes.length} top-level pages submitted`}
+                noPadding
+              >
+                {pageNodes.length === 0 ? (
+                  <EmptyState
+                    icon={BookOpen}
+                    title="No pages recorded"
+                    description="This milestone is marked complete but has no submitted content."
+                  />
+                ) : (
+                  <PageContentViewer nodes={pageNodes} clientName={milestone.client.companyName} milestoneName={def.name} />
+                )}
+              </SectionCard>
+              <ReopenButton milestoneId={milestoneId} clientId={clientId} reopenAction={reopenMilestone} />
+            </>
+          ) : (
+            <>
+              <SectionCard title="Page Tree">
+                <PageTreeEditor
+                  milestoneId={milestoneId}
+                  clientId={clientId}
+                  initialNodes={pageNodes}
+                />
+              </SectionCard>
+              <SectionCard title="Configuration">
+                <MilestoneConfigForm
+                  milestoneId={milestoneId}
+                  clientId={clientId}
+                  initialInstructions={milestone.instructions}
+                  initialFolderPath={null}
+                  showDropbox={false}
+                />
+              </SectionCard>
+            </>
+          )}
+        </Stack>
+      )}
+
       {/* ── Upload types ─────────────────────────────── */}
-      {!isQuestionnaire && !isStaffProfiles && (
+      {!isQuestionnaire && !isStaffProfiles && !isPageContent && (
         <Stack gap="lg">
           {!isCompleted && (
             <SectionCard title="Configuration">

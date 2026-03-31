@@ -83,6 +83,12 @@ export default async function UploadMilestonePage({
   if (milestone.milestoneDefinition.type === "questionnaire") {
     redirect(`/portal/questionnaire/${milestoneId}`);
   }
+  if (milestone.milestoneDefinition.type === "staff_profiles") {
+    redirect(`/portal/staff/${milestoneId}`);
+  }
+  if (milestone.milestoneDefinition.type === "page_content") {
+    redirect(`/portal/page-content/${milestoneId}`);
+  }
 
   const def         = milestone.milestoneDefinition;
   const Icon        = typeIcons[def.type] ?? Upload;

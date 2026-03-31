@@ -25,6 +25,7 @@ const TYPE_LABEL: Record<string, string> = {
   content_docs:         "Content Assets",
   supporting_materials: "Supporting Materials",
   staff_profiles:       "Staff Profiles",
+  page_content:         "Page Content",
 };
 
 export function MilestoneTypeBadge({ type }: { type: string }) {

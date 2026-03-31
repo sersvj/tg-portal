@@ -2,8 +2,9 @@
 
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import { RichTextEditor as MantineRTE, Link as MantineLink } from "@mantine/tiptap";
+import { RichTextEditor as MantineRTE } from "@mantine/tiptap";
 import {
   Bold, Italic, List, ListOrdered, Heading2, Heading3, Link2,
 } from "lucide-react";
@@ -26,7 +27,7 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
-      MantineLink,
+      Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder }),
     ],
     content: value,

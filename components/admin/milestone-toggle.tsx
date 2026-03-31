@@ -11,7 +11,7 @@ import {
   Stack, Group, Text, Badge, ActionIcon, Button, Divider, Box, Tooltip,
 } from "@mantine/core";
 import {
-  ClipboardList, Upload, ImageIcon, FileText, Settings2, Eye, Users,
+  ClipboardList, Upload, ImageIcon, FileText, Settings2, Eye, Users, BookOpen,
   GripVertical, X, Loader2, Plus, RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +31,7 @@ const typeIcons: Record<string, React.ElementType> = {
   content_docs:         FileText,
   supporting_materials: Upload,
   staff_profiles:       Users,
+  page_content:         BookOpen,
 };
 
 const statusColor: Record<MilestoneStatus, string> = {

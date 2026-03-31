@@ -29,6 +29,11 @@ enum FieldType {
   PAGE_BREAK
 }
 
+enum PageNodeType {
+  PAGE
+  LABEL
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -163,7 +168,7 @@ model MilestoneDefinition {
   id          String   @id @default(cuid())
   name        String
   description String?
-  type        String   // questionnaire | brand_assets | content_docs | supporting_materials
+  type        String   // questionnaire | brand_assets | content_docs | supporting_materials | staff_profiles | page_content
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
@@ -193,6 +198,7 @@ model ClientMilestone {
   questionnaireResponses QuestionnaireResponse[]
   uploadedFiles          MilestoneFile[]
   staffProfiles          StaffProfile[]
+  pageNodes              PageNode[]
 }
 
 model MilestoneFile {
@@ -270,6 +276,52 @@ model StaffProfile {
   updatedAt         DateTime        @updatedAt
 
   clientMilestone   ClientMilestone @relation(fields: [clientMilestoneId], references: [id], onDelete: Cascade)
+}
+
+model PageNode {
+  id                String       @id @default(cuid())
+  clientMilestoneId String
+  parentId          String?
+  type              PageNodeType @default(PAGE)
+  title             String
+  order             Int          @default(0)
+  isOptional        Boolean      @default(false)
+  isNA              Boolean      @default(false)
+  content           String?      @db.Text
+
+  clientMilestone   ClientMilestone   @relation(fields: [clientMilestoneId], references: [id], onDelete: Cascade)
+  parent            PageNode?         @relation("PageNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children          PageNode[]        @relation("PageNodeChildren")
+  fields            PageFieldTemplate[]
+  answers           PageFieldAnswer[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model PageFieldTemplate {
+  id         String    @id @default(cuid())
+  pageNodeId String
+  label      String
+  fieldType  FieldType @default(TEXT)
+  required   Boolean   @default(false)
+  order      Int       @default(0)
+  helpText   String?
+
+  pageNode   PageNode          @relation(fields: [pageNodeId], references: [id], onDelete: Cascade)
+  answers    PageFieldAnswer[]
+}
+
+model PageFieldAnswer {
+  id              String            @id @default(cuid())
+  pageNodeId      String
+  fieldTemplateId String
+  value           String
+
+  pageNode        PageNode          @relation(fields: [pageNodeId], references: [id], onDelete: Cascade)
+  fieldTemplate   PageFieldTemplate @relation(fields: [fieldTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([pageNodeId, fieldTemplateId])
 }
 
 model PasswordResetToken {

@@ -11,6 +11,7 @@ type Props = {
   clientId: string;
   initialInstructions: string | null;
   initialFolderPath: string | null;
+  showDropbox?: boolean;
 };
 
 export function MilestoneConfigForm({
@@ -18,6 +19,7 @@ export function MilestoneConfigForm({
   clientId,
   initialInstructions,
   initialFolderPath,
+  showDropbox = true,
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [folderPath, setFolderPath] = useState(initialFolderPath ?? "");
@@ -59,7 +61,7 @@ export function MilestoneConfigForm({
         />
 
         {/* Dropbox folder */}
-        <Stack gap="xs">
+        {showDropbox && <Stack gap="xs">
           <Text size="sm" fw={500} c="gray.9">Dropbox Destination Folder</Text>
           <Text size="xs" c="gray.5">Files uploaded by the client will land in this Dropbox folder. The folder will be created if it doesn&apos;t exist.</Text>
 
@@ -94,7 +96,7 @@ export function MilestoneConfigForm({
           )}
 
           <DropboxFolderPicker currentPath={folderPath || null} onSelect={setFolderPath} />
-        </Stack>
+        </Stack>}
 
         {error && (
           <Alert icon={<AlertCircle size={14} />} color="red">

@@ -195,4 +195,5 @@ export const MILESTONE_TYPE_COLOR: Record<string, string> = {
   content_docs:         "gray",
   supporting_materials: "green",
   staff_profiles:       "teal",
+  page_content:         "indigo",
 };

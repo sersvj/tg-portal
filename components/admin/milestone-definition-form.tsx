@@ -11,6 +11,7 @@ const TYPE_OPTIONS = [
   { value: "content_docs",         label: "Content Assets" },
   { value: "supporting_materials", label: "Supporting Materials" },
   { value: "staff_profiles",       label: "Staff Profiles" },
+  { value: "page_content",         label: "Page Content" },
 ];
 
 export function MilestoneDefinitionForm() {
